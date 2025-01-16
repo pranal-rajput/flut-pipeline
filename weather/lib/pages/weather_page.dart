@@ -69,7 +69,7 @@ class _WeatherPageState extends State<WeatherPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Daily Weather",
+        title: const Text("Weather Mode",
         style: TextStyle(fontSize: 24, fontWeight:FontWeight.bold),
         ),
         actions: [
