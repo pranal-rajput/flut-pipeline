@@ -1,0 +1,104 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Job to build and test the Node.js backend
+  backend:
+    name: Backend Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Step 3: Install dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # Step 4: Run tests
+      - name: Run Backend Tests
+        run: npm test
+
+      # Step 5: Build the backend
+      - name: Build Backend
+        run: npm run build
+
+  # Job to build and test the Flutter mobile app
+  flutter:
+    name: Flutter Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Install Flutter
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      # Step 3: Get Flutter dependencies
+      - name: Get Dependencies
+        run: flutter pub get
+
+      # Step 4: Run Flutter tests
+      - name: Run Flutter Tests
+        run: flutter test
+
+      # Step 5: Build Flutter app
+      - name: Build Flutter APK
+        run: flutter build apk --release
+
+  # Job to deploy the backend (optional)
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    needs: backend # Run this job only if the backend job succeeds
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Deploy backend to server (example: SSH or Docker)
+      - name: Deploy Backend
+        run: |
+          echo "Deploying backend..."
+          # Add your deployment script here
+          # Example: scp, rsync, docker push, etc.
+
+  # Job to deploy Flutter app to Firebase App Distribution (optional)
+  deploy-flutter:
+    name: Deploy Flutter App
+    runs-on: ubuntu-latest
+    needs: flutter # Run this job only if the Flutter job succeeds
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Deploy Flutter app to Firebase
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-app-distribution@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          token: ${{ secrets.FIREBASE_AUTH_TOKEN }}
+          groups: testers
